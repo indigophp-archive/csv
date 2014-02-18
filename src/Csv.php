@@ -25,33 +25,55 @@ use BadMethodCallException;
 class Csv
 {
     /**
-     * Csv file
+     * File URI
      *
-     * @var CsvFileObject
+     * @var string
      */
     protected $file;
 
+    /**
+     * Csv file resource
+     *
+     * @var resource
+     */
+    protected $resource;
+
+    protected $options;
+
     protected $header = array();
 
-    protected $strict = true;
+    protected static $defaultOptions = array(
+        'delimiter' => ',',
+        'enclosure' => '"',
+        'newline' => "\n",
+        'escape' => '\\',
+        'encoding' => 'UTF-8'
+    );
 
-    protected $delimiter = ',';
-    protected $enclosure = '"';
-    protected $newline = "\n";
-    protected $escape = '\\';
-    protected $fileMode;
+    protected static $fileMode = 'r+';
 
-    public function __construct($file)
+    public function __construct($file, array $options = array())
     {
         if (is_string($file)) {
-            $file = new CsvFileObject($file, 'w+');
+            $file = new CsvFileObject($file, static::$fileMode);
         }
 
         if (!$file instanceof CsvFileObject) {
             throw new InvalidArgumentException('Invalid CsvFileObject');
         }
 
+        $resolver = new OptionsResolver();
+        $this->setDefaultOptions($resolver);
+
         $this->file = $file;
+        $this->options = $resolver->resolve($options);
+    }
+
+    protected function setDefaultOptions(OptionsResolverInterface $resolver)
+    {
+        $resolver->setDefaults(static::$defaultOptions);
+
+        $resolver->setAllowedTypes(array_fill_keys(array_keys(static::$defaultOptions), 'string'));
     }
 
     public function setNewline($newline)
@@ -118,57 +140,30 @@ class Csv
         }
     }
 
-    public function parse()
-    {
-        $lines = array();
-
-        $this->file->rewind();
-
-        while ($this->file->valid()) {
-            $line = $this->file->fgetcsv();
-
-            if (empty($lines) and $line === $this->header or $line === array(null)) {
-                continue;
-            }
-
-            $lines[] = $this->parseLine($line);
-        }
-
-        return $lines;
-    }
-
-    protected function parseLine(array $line)
-    {
-        if (!empty($this->header)) {
-            $header = $this->header;
-
-            if (true !== $this->checkRowConsistency($line)) {
-                throw new UnexpectedValueException('Given line is inconsistent with the document.');
-            }
-
-            $header = array_slice($header, 0, count($line));
-
-            $line = array_combine($header, $line);
-        }
-
-        return $line;
-    }
-
     public function __call($method, $arguments)
     {
-        if (strpos($method, 'set') === 0 and property_exists($this, $property = lcfirst(substr($method, 3)))) {
+        if (strpos($method, 'set') === 0 and $property = lcfirst(substr($method, 3)))) {
             $value = reset($arguments);
-            isset($this->{$property}) and $type = gettype($this->{$property});
 
-            if (isset($type) and $type !== gettype($value)) {
-                throw new InvalidArgumentException('Property ' . $property . ' should be of type ' . $type);
+            if (property_exists($this, $property) {
+                isset($this->{$property}) and $type = gettype($this->{$property});
+
+                if (isset($type) and $type !== gettype($value)) {
+                    throw new InvalidArgumentException('Property ' . $property . ' should be of type ' . $type);
+                }
+
+                $this->{$property} = $value;
+            } elseif (array_key_exists($property, $this->options)) {
+                $this->options[$property] = $value;
             }
 
-            $this->{$property} = $value;
-
             return $this;
-        } elseif (strpos($method, 'get') === 0 and property_exists($this, $property = lcfirst(substr($method, 3)))) {
-            return $this->{$property};
+        } elseif (strpos($method, 'get') === 0) {
+            if (property_exists($this, $property) {
+                return $this->{$property};
+            } elseif (array_key_exists($property, $this->options)) {
+                return $this->options[$property];
+            }
         } else {
             throw new BadMethodCallException('Method ' . $method . ' does not exists.');
         }
