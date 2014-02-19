@@ -191,33 +191,4 @@ class Csv
             $this->writeLine($line);
         }
     }
-
-    public function __call($method, $arguments)
-    {
-        if (strpos($method, 'set') === 0 and $property = lcfirst(substr($method, 3))) {
-            $value = reset($arguments);
-
-            if (property_exists($this, $property)) {
-                isset($this->{$property}) and $type = gettype($this->{$property});
-
-                if (isset($type) and $type !== gettype($value)) {
-                    throw new InvalidArgumentException('Property ' . $property . ' should be of type ' . $type);
-                }
-
-                $this->{$property} = $value;
-            } elseif (array_key_exists($property, $this->options)) {
-                $this->options[$property] = $value;
-            }
-
-            return $this;
-        } elseif (strpos($method, 'get') === 0 and $property = lcfirst(substr($method, 3))) {
-            if (property_exists($this, $property)) {
-                return $this->{$property};
-            } elseif (array_key_exists($property, $this->options)) {
-                return $this->options[$property];
-            }
-        } else {
-            throw new BadMethodCallException('Method ' . $method . ' does not exists.');
-        }
-    }
 }
