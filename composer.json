@@ -12,7 +12,8 @@
     ],
     "require": {
         "php": ">=5.3.2",
-        "ext-mbstring": "*"
+        "ext-mbstring": "*",
+        "symfony/options-resolver": "v2.4.2"
     },
     "autoload": {
         "psr-4": {
