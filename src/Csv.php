@@ -11,6 +11,9 @@
 
 namespace Indigo\Csv;
 
+use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\OptionsResolver\OptionsResolverInterface;
+use Symfony\Component\OptionsResolver\Options;
 use InvalidArgumentException;
 use UnexpectedValueException;
 use BadMethodCallException;
@@ -38,18 +41,46 @@ class Csv
      */
     protected $resource;
 
-    protected $options;
+    /**
+     * Options
+     *
+     * @var Options
+     */
+    protected $options = array();
 
+    /**
+     * File header
+     *
+     * @var array
+     */
     protected $header = array();
 
+    /**
+     * Column count checked for row consistency
+     *
+     * @var integer
+     */
+    protected $columnCount;
+
+    /**
+     * Default options
+     *
+     * @var array
+     */
     protected static $defaultOptions = array(
         'delimiter' => ',',
         'enclosure' => '"',
         'newline' => "\n",
         'escape' => '\\',
-        'encoding' => 'UTF-8'
+        'encoding' => 'UTF-8',
+        'strict' => true,
     );
 
+    /**
+     * File open mode
+     *
+     * @var string
+     */
     protected static $fileMode = 'r+';
 
     public function __construct($file, array $options = array())
@@ -62,25 +93,48 @@ class Csv
             throw new InvalidArgumentException('Invalid CsvFileObject');
         }
 
-        $resolver = new OptionsResolver();
-        $this->setDefaultOptions($resolver);
+        // Not sure where the pointer is
+        $file->rewind();
 
         $this->file = $file;
-        $this->options = $resolver->resolve($options);
+        $this->setOptions($options);
     }
 
     protected function setDefaultOptions(OptionsResolverInterface $resolver)
     {
         $resolver->setDefaults(static::$defaultOptions);
 
-        $resolver->setAllowedTypes(array_fill_keys(array_keys(static::$defaultOptions), 'string'));
+        $types = array_fill_keys(array_keys(static::$defaultOptions), 'string');
+        $types['strict'] = 'bool';
+        $resolver->setAllowedTypes($types);
     }
 
-    public function setNewline($newline)
+    public function setOptions(array $options)
     {
-        $this->newline = $newline;
+        static $resolver;
 
-        $this->file->setNewline($newline);
+        if (is_null($resolver)) {
+            $resolver = new OptionsResolver();
+            $this->setDefaultOptions($resolver);
+        } else {
+            $resolver->setDefaults($this->options);
+        }
+
+        $this->options = $resolver->resolve($options);
+
+        return $this;
+    }
+
+    public function getHeader()
+    {
+        return $this->header;
+    }
+
+    public function setHeader($header)
+    {
+        $this->header = $header;
+
+        $this->columnCount = count($header);
 
         return $this;
     }
@@ -105,21 +159,19 @@ class Csv
 
     public function checkRowConsistency($line)
     {
-        if ($this->strict !== true) {
+        if ($this->options['strict'] !== true) {
             return true;
         }
 
-        static $columnCount;
-
-        if (is_null($columnCount)) {
-            if (!empty($this->header)) {
-                $columnCount = count($this->header);
+        if (is_null($this->columnCount)) {
+            if (!empty($this->header) and is_array($this->header)) {
+                $this->columnCount = count($this->header);
             } else {
-                $columnCount = count($line);
+                $this->columnCount = count($line);
             }
         }
 
-        return count($line) === $columnCount;
+        return count($line) === $this->columnCount;
     }
 
     public function writeLine($line)
@@ -142,10 +194,10 @@ class Csv
 
     public function __call($method, $arguments)
     {
-        if (strpos($method, 'set') === 0 and $property = lcfirst(substr($method, 3)))) {
+        if (strpos($method, 'set') === 0 and $property = lcfirst(substr($method, 3))) {
             $value = reset($arguments);
 
-            if (property_exists($this, $property) {
+            if (property_exists($this, $property)) {
                 isset($this->{$property}) and $type = gettype($this->{$property});
 
                 if (isset($type) and $type !== gettype($value)) {
@@ -158,8 +210,8 @@ class Csv
             }
 
             return $this;
-        } elseif (strpos($method, 'get') === 0) {
-            if (property_exists($this, $property) {
+        } elseif (strpos($method, 'get') === 0 and $property = lcfirst(substr($method, 3))) {
+            if (property_exists($this, $property)) {
                 return $this->{$property};
             } elseif (array_key_exists($property, $this->options)) {
                 return $this->options[$property];
