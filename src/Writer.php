@@ -30,4 +30,40 @@ class Write extends Csv
 
         return $this;
     }
+
+    protected function ensureHeader()
+    {
+        static $written = false;
+
+        if ($written === false) {
+            $written = true;
+
+            if (!empty($this->header)) {
+                // Ensure headers are written at the beginning of the file
+                $this->file->rewind();
+
+                $this->writeLine($this->header);
+            }
+        }
+
+        return $written;
+    }
+
+    public function writeLine($line)
+    {
+        $this->ensureHeader();
+
+        if (true !== $this->checkRowConsistency($line)) {
+            throw new UnexpectedValueException('Given line is inconsistent with the document.');
+        }
+
+        return $this->file->fputcsv($line, $this->delimiter, $this->enclosure);
+    }
+
+    public function writeLines($lines)
+    {
+        foreach ($lines as $line) {
+            $this->writeLine($line);
+        }
+    }
 }
