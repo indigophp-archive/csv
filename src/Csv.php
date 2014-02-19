@@ -90,10 +90,6 @@ class Csv
         }
 
         $this->setFile($file);
-
-        // Not sure where the pointer is
-        $this->file->rewind();
-
         $this->setOptions($options);
     }
 
@@ -143,6 +139,9 @@ class Csv
 
     public function setFile(CsvFileObject $file)
     {
+        // Not sure where the pointer is
+        $file->rewind();
+
         $this->file = $file;
 
         return $this;
