@@ -123,14 +123,7 @@ class Csv
         return $this->header;
     }
 
-    public function setHeader($header)
-    {
-        $this->header = $header;
-
-        $this->columnCount = count($header);
-
-        return $this;
-    }
+    abstract public function setHeader($header);
 
     public function getFile()
     {

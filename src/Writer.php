@@ -22,5 +22,12 @@ use UnexpectedValueException;
  */
 class Write extends Csv
 {
+    public function setHeader($header)
+    {
+        $this->header = $header;
 
+        $this->columnCount = count($header);
+
+        return $this;
+    }
 }
