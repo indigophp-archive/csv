@@ -89,14 +89,11 @@ class Csv
             $file = new CsvFileObject($file, static::$fileMode);
         }
 
-        if (!$file instanceof CsvFileObject) {
-            throw new InvalidArgumentException('Invalid CsvFileObject');
-        }
+        $this->setFile($file);
 
         // Not sure where the pointer is
-        $file->rewind();
+        $this->file->rewind();
 
-        $this->file = $file;
         $this->setOptions($options);
     }
 
@@ -135,6 +132,18 @@ class Csv
         $this->header = $header;
 
         $this->columnCount = count($header);
+
+        return $this;
+    }
+
+    public function getFile()
+    {
+        return $this->file;
+    }
+
+    public function setFile(CsvFileObject $file)
+    {
+        $this->file = $file;
 
         return $this;
     }
