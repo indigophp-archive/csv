@@ -12,6 +12,7 @@
 namespace Indigo\Csv;
 
 use UnexpectedValueException;
+use Exception;
 
 /**
  * Csv Writer class
@@ -22,54 +23,69 @@ use UnexpectedValueException;
  */
 class Write extends Csv
 {
-    protected function setDefaultOptions(OptionsResolverInterface $resolver)
-    {
-        parent::setDefaultOptions($resolver);
+    /**
+     * If frozen settings cannot be modified
+     *
+     * @var boolean
+     */
+    protected $frozen;
 
-        $resolver->setDefaults(array('header' => array()));
-        $resolver->setAllowedTypes(array('header' => 'array'));
-    }
+    protected static $fileMode = 'w+';
 
     public function setOptions(array $options)
     {
-        parent::setOptions($options);
-
-        if (empty($options['header'])) {
-            $this->columnCount = null;
-        } else {
-            $this->columnCount = count($options['header']);
+        if ($this->frozen) {
+            throw new Exception('Frozen object');
         }
 
-        return $this;
+        return parent::setOptions($options);
     }
 
-    protected function ensureHeader()
+    /**
+     * Check whether Writer is frozen
+     *
+     * @return boolean
+     */
+    public function isFrozen()
     {
-        static $written = false;
+        return $this->frozen;
+    }
 
-        if ($written === false) {
-            $written = true;
+    /**
+     * Reset Writer
+     *
+     * @return boolean
+     */
+    public function reset()
+    {
+        $return = parent::reset();
 
-            if (!empty($this->header)) {
-                // Ensure headers are written at the beginning of the file
-                $this->file->rewind();
+        // Unfreeze object
+        $this->frozen = false;
 
-                $this->writeLine($this->header);
-            }
+        return $return;
+    }
+
+    public function writeHeader(array $header)
+    {
+        if ($this->frozen) {
+            throw new Exception('Header should be written first');
         }
 
-        return $written;
+        return $this->writeLine($header);
     }
 
     public function writeLine($line)
     {
-        $this->ensureHeader();
+        $this->frozen = true;
 
-        if (true !== $this->checkRowConsistency($line)) {
+        if ($this->checkRowConsistency($line) === false) {
             throw new UnexpectedValueException('Given line is inconsistent with the document.');
         }
 
-        return $this->file->fputcsv($line, $this->delimiter, $this->enclosure);
+        $this->file->fputcsv($line, $this->delimiter, $this->enclosure);
+
+        return $this;
     }
 
     public function writeLines($lines)

@@ -104,6 +104,21 @@ class Csv
         return $this;
     }
 
+    /**
+     * Reset object
+     *
+     * @return boolean
+     */
+    public function reset()
+    {
+        // Reset pointer
+        $this->file->rewind();
+
+        $this->columnCount = null;
+
+        return true;
+    }
+
     public function getFile()
     {
         return $this->file;
@@ -111,10 +126,10 @@ class Csv
 
     public function setFile(CsvFileObject $file)
     {
-        // Not sure where the pointer is
-        $file->rewind();
-
         $this->file = $file;
+
+        // Reset object
+        $this->reset();
 
         return $this;
     }

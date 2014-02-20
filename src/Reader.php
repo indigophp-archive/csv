@@ -35,7 +35,7 @@ class Reader extends Csv
         $lines = array();
         $header = null;
 
-        $this->file->rewind();
+        $this->reset();
 
         while ($this->file->valid()) {
             $line = $this->file->fgetcsv(
@@ -62,7 +62,7 @@ class Reader extends Csv
 
     protected function parseLine(array $line, array $keys = null)
     {
-        if (true !== $this->checkRowConsistency($line)) {
+        if ($this->checkRowConsistency($line) === false) {
             throw new UnexpectedValueException('Given line is inconsistent with the document.');
         }
 
