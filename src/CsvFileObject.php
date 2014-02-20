@@ -81,7 +81,7 @@ class CsvFileObject extends SplFileObject
      * @param  string $enclosure
      * @return string CSV line
      */
-    protected function getTempLine(array $fields, $delimiter = ',', $enclosure = '"')
+    protected function getTempLine(array $fields, $delimiter = null, $enclosure = null)
     {
         $fp = fopen('php://temp', 'w+');
         fputcsv($fp, $fields, $delimiter, $enclosure);
