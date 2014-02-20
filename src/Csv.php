@@ -49,13 +49,6 @@ class Csv
     protected $options = array();
 
     /**
-     * File header
-     *
-     * @var array
-     */
-    protected $header = array();
-
-    /**
      * Column count checked for row consistency
      *
      * @var integer
@@ -118,13 +111,6 @@ class Csv
         return $this;
     }
 
-    public function getHeader()
-    {
-        return $this->header;
-    }
-
-    abstract public function setHeader($header);
-
     public function getFile()
     {
         return $this->file;
@@ -142,16 +128,12 @@ class Csv
 
     public function checkRowConsistency($line)
     {
-        if ($this->options['strict'] !== true) {
+        if ($this->options['strict'] === false) {
             return true;
         }
 
         if (is_null($this->columnCount)) {
-            if (!empty($this->header) and is_array($this->header)) {
-                $this->columnCount = count($this->header);
-            } else {
-                $this->columnCount = count($line);
-            }
+            $this->columnCount = count($line);
         }
 
         return count($line) === $this->columnCount;

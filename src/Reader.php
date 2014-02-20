@@ -22,11 +22,12 @@ use UnexpectedValueException;
  */
 class Reader extends Csv
 {
-    public function setHeader($header)
+    protected function setDefaultOptions(OptionsResolverInterface $resolver)
     {
-        $this->header = (bool) $header;
+        parent::setDefaultOptions($resolver);
 
-        return $this;
+        $resolver->setDefaults(array('header' => false));
+        $resolver->setAllowedTypes(array('header' => 'bool'));
     }
 
     public function parse()
@@ -47,7 +48,7 @@ class Reader extends Csv
                 continue;
             }
 
-            if ($this->header === true and is_null($header)) {
+            if ($this->options['header'] === true and is_null($header)) {
                 $header = $line;
                 $this->columnCount = count($line);
                 continue;

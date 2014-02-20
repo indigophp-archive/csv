@@ -22,11 +22,23 @@ use UnexpectedValueException;
  */
 class Write extends Csv
 {
-    public function setHeader($header)
+    protected function setDefaultOptions(OptionsResolverInterface $resolver)
     {
-        $this->header = $header;
+        parent::setDefaultOptions($resolver);
 
-        $this->columnCount = count($header);
+        $resolver->setDefaults(array('header' => array()));
+        $resolver->setAllowedTypes(array('header' => 'array'));
+    }
+
+    public function setOptions(array $options)
+    {
+        parent::setOptions($options);
+
+        if (empty($options['header'])) {
+            $this->columnCount = null;
+        } else {
+            $this->columnCount = count($options['header']);
+        }
 
         return $this;
     }
