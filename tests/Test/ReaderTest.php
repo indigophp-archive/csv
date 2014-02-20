@@ -11,8 +11,7 @@ class ReaderTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $csvFile = new CsvFileObject(realpath(__DIR__ . '/../') . '/test.csv', 'rb');
-        $this->reader = new Reader($csvFile);
+        $this->reader = new Reader(realpath(__DIR__ . '/../') . '/test.csv', array('header' => true));
     }
 
     public function testFile()
@@ -23,8 +22,6 @@ class ReaderTest extends \PHPUnit_Framework_TestCase
 
     public function testReader()
     {
-        $this->reader->setHeader(true);
-
         $test = array(
             array(
                 'name' => 'John Doe',
@@ -42,8 +39,7 @@ class ReaderTest extends \PHPUnit_Framework_TestCase
     public function testNoneStrict()
     {
         $csvFile = new CsvFileObject(realpath(__DIR__ . '/../') . '/inconsistent.csv', 'rb');
-        $reader = new Reader($csvFile, array('strict' => false));
-        $reader->setHeader(true);
+        $reader = new Reader($csvFile, array('strict' => false, 'header' => true));
 
         $test = array(
             array(
@@ -62,9 +58,8 @@ class ReaderTest extends \PHPUnit_Framework_TestCase
         $reader = new Reader($csvFile, array(
             'delimiter' => ';',
             'enclosure' => "'",
+            'header' => true,
         ));
-
-        $reader->setHeader(true);
 
         $test = array(
             array(
