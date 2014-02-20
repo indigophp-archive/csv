@@ -11,6 +11,9 @@
 
 namespace Indigo\Csv;
 
+use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\OptionsResolver\OptionsResolverInterface;
+use Symfony\Component\OptionsResolver\Options;
 use InvalidArgumentException;
 use UnexpectedValueException;
 use BadMethodCallException;
@@ -25,152 +28,123 @@ use BadMethodCallException;
 class Csv
 {
     /**
-     * Csv file
+     * Csv file resource
      *
-     * @var CsvFileObject
+     * @var resource
      */
     protected $file;
 
-    protected $header = array();
+    /**
+     * Options
+     *
+     * @var Options
+     */
+    protected $options = array();
 
-    protected $strict = true;
+    /**
+     * Column count checked for row consistency
+     *
+     * @var integer
+     */
+    protected $columnCount;
 
-    protected $delimiter = ',';
-    protected $enclosure = '"';
-    protected $newline = "\n";
-    protected $escape = '\\';
-    protected $fileMode;
+    /**
+     * Default options
+     *
+     * @var array
+     */
+    protected static $defaultOptions = array(
+        'delimiter' => ',',
+        'enclosure' => '"',
+        'newline' => "\n",
+        'escape' => '\\',
+        'encoding' => 'UTF-8',
+        'strict' => true,
+    );
 
-    public function __construct($file)
+    /**
+     * File open mode
+     *
+     * @var string
+     */
+    protected static $fileMode = 'r+';
+
+    public function __construct($file, array $options = array())
     {
         if (is_string($file)) {
-            $file = new CsvFileObject($file, 'w+');
+            $file = new CsvFileObject($file, static::$fileMode);
         }
 
-        if (!$file instanceof CsvFileObject) {
-            throw new InvalidArgumentException('Invalid CsvFileObject');
-        }
-
-        $this->file = $file;
+        $this->setFile($file);
+        $this->setOptions($options);
     }
 
-    public function setNewline($newline)
+    protected function setDefaultOptions(OptionsResolverInterface $resolver)
     {
-        $this->newline = $newline;
+        $resolver->setDefaults(static::$defaultOptions);
 
-        $this->file->setNewline($newline);
+        $types = array_fill_keys(array_keys(static::$defaultOptions), 'string');
+        $types['strict'] = 'bool';
+        $resolver->setAllowedTypes($types);
+    }
+
+    public function setOptions(array $options)
+    {
+        static $resolver;
+
+        if (is_null($resolver)) {
+            $resolver = new OptionsResolver();
+            $this->setDefaultOptions($resolver);
+        } else {
+            $resolver->setDefaults($this->options);
+        }
+
+        $this->options = $resolver->resolve($options);
+        $this->file->setNewline($this->options['newline']);
 
         return $this;
     }
 
-    protected function ensureHeader()
+    /**
+     * Reset object
+     *
+     * @return boolean
+     */
+    public function reset()
     {
-        static $written = false;
+        // Reset pointer
+        $this->file->rewind();
 
-        if ($written === false) {
-            $written = true;
+        $this->columnCount = null;
 
-            if (!empty($this->header)) {
-                // Ensure headers are written at the beginning of the file
-                $this->file->rewind();
+        return true;
+    }
 
-                $this->writeLine($this->header);
-            }
-        }
+    public function getFile()
+    {
+        return $this->file;
+    }
 
-        return $written;
+    public function setFile(CsvFileObject $file)
+    {
+        $this->file = $file;
+
+        // Reset object
+        $this->reset();
+
+        return $this;
     }
 
     public function checkRowConsistency($line)
     {
-        if ($this->strict !== true) {
+        if ($this->options['strict'] === false) {
             return true;
         }
 
-        static $columnCount;
-
-        if (is_null($columnCount)) {
-            if (!empty($this->header)) {
-                $columnCount = count($this->header);
-            } else {
-                $columnCount = count($line);
-            }
+        if (is_null($this->columnCount)) {
+            $this->columnCount = count($line);
         }
 
-        return count($line) === $columnCount;
-    }
-
-    public function writeLine($line)
-    {
-        $this->ensureHeader();
-
-        if (true !== $this->checkRowConsistency($line)) {
-            throw new UnexpectedValueException('Given line is inconsistent with the document.');
-        }
-
-        return $this->file->fputcsv($line, $this->delimiter, $this->enclosure);
-    }
-
-    public function writeLines($lines)
-    {
-        foreach ($lines as $line) {
-            $this->writeLine($line);
-        }
-    }
-
-    public function parse()
-    {
-        $lines = array();
-
-        $this->file->rewind();
-
-        while ($this->file->valid()) {
-            $line = $this->file->fgetcsv();
-
-            if (empty($lines) and $line === $this->header or $line === array(null)) {
-                continue;
-            }
-
-            $lines[] = $this->parseLine($line);
-        }
-
-        return $lines;
-    }
-
-    protected function parseLine(array $line)
-    {
-        if (!empty($this->header)) {
-            $header = $this->header;
-
-            if (true !== $this->checkRowConsistency($line)) {
-                throw new UnexpectedValueException('Given line is inconsistent with the document.');
-            }
-
-            $header = array_slice($header, 0, count($line));
-
-            $line = array_combine($header, $line);
-        }
-
-        return $line;
-    }
-
-    public function __call($method, $arguments)
-    {
-        if (strpos($method, 'set') === 0 and property_exists($this, $property = lcfirst(substr($method, 3)))) {
-            $value = reset($arguments);
-            isset($this->{$property}) and $type = gettype($this->{$property});
-
-            if (isset($type) and $type !== gettype($value)) {
-                throw new InvalidArgumentException('Property ' . $property . ' should be of type ' . $type);
-            }
-
-            $this->{$property} = $value;
-
-            return $this;
-        } elseif (strpos($method, 'get') === 0 and property_exists($this, $property = lcfirst(substr($method, 3)))) {
-            return $this->{$property};
-        } else {
-            throw new BadMethodCallException('Method ' . $method . ' does not exists.');
-        }
+        return count($line) === $this->columnCount;
     }
 }

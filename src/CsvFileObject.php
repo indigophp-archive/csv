@@ -20,21 +20,12 @@ use SplFileObject;
  */
 class CsvFileObject extends SplFileObject
 {
-    const FILE_MODE_WRITE  = 'w';
-    const FILE_MODE_APPEND = 'a';
-
     /**
      * New line character
      *
      * @var string
      */
     protected $newline = "\n";
-
-    /**
-     * CSV filter
-     * @var callable
-     */
-    private $csvFilter;
 
     /**
      * Set new line character(s)
@@ -44,15 +35,8 @@ class CsvFileObject extends SplFileObject
     public function setNewline($newline)
     {
         $this->newline = $newline;
-    }
 
-    /**
-     * Set csv filter
-     * @param callable $filter
-     */
-    public function setCsvFilter($filter)
-    {
-        $this->csvFilter = $filter;
+        return $this;
     }
 
     /**
