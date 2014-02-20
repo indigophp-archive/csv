@@ -11,6 +11,7 @@
 
 namespace Indigo\Csv;
 
+use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 use UnexpectedValueException;
 
 /**
