@@ -100,6 +100,7 @@ class Csv
         }
 
         $this->options = $resolver->resolve($options);
+        $this->file->setNewline($this->options['newline']);
 
         return $this;
     }
