@@ -12,7 +12,7 @@
 namespace Indigo\Csv;
 
 use UnexpectedValueException;
-use Exception;
+use LogicException;
 
 /**
  * Csv Writer class
@@ -21,7 +21,7 @@ use Exception;
  *
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
  */
-class Write extends Csv
+class Writer extends Csv
 {
     /**
      * If frozen settings cannot be modified
@@ -35,7 +35,7 @@ class Write extends Csv
     public function setOptions(array $options)
     {
         if ($this->frozen) {
-            throw new Exception('Frozen object');
+            throw new LogicException('Frozen object');
         }
 
         return parent::setOptions($options);
@@ -69,7 +69,7 @@ class Write extends Csv
     public function writeHeader(array $header)
     {
         if ($this->frozen) {
-            throw new Exception('Header should be written first');
+            throw new LogicException('Header should be written first');
         }
 
         return $this->writeLine($header);
@@ -83,7 +83,7 @@ class Write extends Csv
             throw new UnexpectedValueException('Given line is inconsistent with the document.');
         }
 
-        return $this->file->fputcsv($line, $this->delimiter, $this->enclosure);
+        return $this->file->fputcsv($line, $this->options['delimiter'], $this->options['enclosure']);
     }
 
     public function writeLines($lines)
