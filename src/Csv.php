@@ -28,18 +28,11 @@ use BadMethodCallException;
 class Csv
 {
     /**
-     * File URI
-     *
-     * @var string
-     */
-    protected $file;
-
-    /**
      * Csv file resource
      *
      * @var resource
      */
-    protected $resource;
+    protected $file;
 
     /**
      * Options
