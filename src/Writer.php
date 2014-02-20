@@ -83,9 +83,7 @@ class Write extends Csv
             throw new UnexpectedValueException('Given line is inconsistent with the document.');
         }
 
-        $this->file->fputcsv($line, $this->delimiter, $this->enclosure);
-
-        return $this;
+        return $this->file->fputcsv($line, $this->delimiter, $this->enclosure);
     }
 
     public function writeLines($lines)
@@ -93,5 +91,20 @@ class Write extends Csv
         foreach ($lines as $line) {
             $this->writeLine($line);
         }
+
+        return true;
+    }
+
+    public function writeAssoc($lines)
+    {
+        foreach ($lines as $line) {
+            if ($this->frozen === false) {
+                $this->writeHeader(array_keys($line));
+            }
+
+            $this->writeLine($line);
+        }
+
+        return true;
     }
 }
