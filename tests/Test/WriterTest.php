@@ -69,6 +69,13 @@ class WriterTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->writer->writeAssoc($this->test));
     }
 
+    public function testWriteAdvancedDefault()
+    {
+        $file = $this->writer->getFile();
+
+        $this->assertGreaterThan(0, $file->fputcsv($this->test[0], null, null));
+    }
+
     public function testWriteNonStrict()
     {
         $this->writer->setOptions(array('strict' => false));

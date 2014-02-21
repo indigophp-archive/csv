@@ -59,8 +59,10 @@ class CsvFileObject extends SplFileObject
      * @param  string  $enclosure
      * @return integer|false
      */
-    public function fputcsv(array $fields, $delimiter = ',', $enclosure = '"')
+    public function fputcsv($fields, $delimiter = null, $enclosure = null)
     {
+        $this->defaultCsvControl($delimiter, $enclosure);
+
         if ($this->isSpecial($delimiter, $enclosure)) {
             $line = $this->getTempLine($fields, $delimiter, $enclosure);
 
@@ -83,7 +85,7 @@ class CsvFileObject extends SplFileObject
      * @param  string $enclosure
      * @return string CSV line
      */
-    protected function getTempLine($fields, $delimiter = null, $enclosure = null)
+    protected function getTempLine($fields, $delimiter, $enclosure)
     {
         $fp = fopen('php://temp', 'w+');
         fputcsv($fp, $fields, $delimiter, $enclosure);
@@ -99,5 +101,18 @@ class CsvFileObject extends SplFileObject
         fclose($fp);
 
         return $line;
+    }
+
+    protected function defaultCsvControl(& $delimiter, & $enclosure)
+    {
+        $csv = $this->getCsvControl();
+
+        if (is_null($delimiter)) {
+            $delimiter = $csv[0];
+        }
+
+        if (is_null($enclosure)) {
+            $enclosure = $csv[1];
+        }
     }
 }
