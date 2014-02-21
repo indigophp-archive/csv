@@ -59,13 +59,15 @@ class CsvFileObject extends SplFileObject
      * @param  string  $enclosure
      * @return integer|false
      */
-    public function fputcsv($fields, $delimiter = null, $enclosure = null)
+    public function fputcsv($fields, $delimiter = ',', $enclosure = '"')
     {
         if ($this->isSpecial($delimiter, $enclosure)) {
             $line = $this->getTempLine($fields, $delimiter, $enclosure);
 
             // fputcsv() hardcodes "\n" as a new line character
-            $this->newline !== "\n" and $line = rtrim($line, "\n") . $this->newline;
+            if ($this->newline !== "\n") {
+                $line = rtrim($line, "\n") . $this->newline;
+            }
 
             return $this->fwrite($line);
         }
