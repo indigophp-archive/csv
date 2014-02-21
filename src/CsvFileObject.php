@@ -48,7 +48,7 @@ class CsvFileObject extends SplFileObject
      */
     public function isSpecial($delimiter, $enclosure)
     {
-        return PHP_VERSION_ID < 50400 or $this->newline != "\n" or strlen($delimiter) > 1 or strlen($enclosure) > 1;
+        return PHP_VERSION_ID < 50400 or $this->newline !== "\n" or strlen($delimiter) > 1 or strlen($enclosure) > 1;
     }
 
     /**
