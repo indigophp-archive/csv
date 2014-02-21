@@ -103,6 +103,12 @@ class CsvFileObject extends SplFileObject
         return $line;
     }
 
+    /**
+     * Set default CSV controls
+     *
+     * @param mixed $delimiter Null for default
+     * @param mixed $enclosure Null for default
+     */
     protected function defaultCsvControl(& $delimiter, & $enclosure)
     {
         $csv = $this->getCsvControl();
