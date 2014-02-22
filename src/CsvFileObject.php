@@ -28,6 +28,13 @@ class CsvFileObject extends SplFileObject
     protected $newline = "\n";
 
     /**
+     * Check whether CSV should be generated "special" way
+     *
+     * @var boolean
+     */
+    protected $special;
+
+    /**
      * Set new line character(s)
      *
      * @param string $newline
@@ -36,7 +43,19 @@ class CsvFileObject extends SplFileObject
     {
         $this->newline = $newline;
 
+        $this->resetSpecial();
+
         return $this;
+    }
+
+    /**
+     * Reset special value to default
+     *
+     * @return boolean Special value
+     */
+    public function resetSpecial()
+    {
+        return $this->special = PHP_VERSION_ID < 50400 or $this->newline !== "\n";
     }
 
     /**
@@ -48,13 +67,14 @@ class CsvFileObject extends SplFileObject
      */
     public function isSpecial($delimiter, $enclosure)
     {
-        static $php;
+        static $special = false;
 
-        if (is_null($php)) {
-            $php = PHP_VERSION_ID < 50400;
+        if ($special === false) {
+            $this->resetSpecial();
+            $special = true;
         }
 
-        return $php or $this->newline !== "\n" or strlen($delimiter) > 1 or strlen($enclosure) > 1;
+        return $this->special or strlen($delimiter) > 1 or strlen($enclosure) > 1;
     }
 
     /**
