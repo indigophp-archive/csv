@@ -55,17 +55,15 @@ class CsvFileObject extends SplFileObject
      */
     public function resetSpecial()
     {
-        return $this->special = PHP_VERSION_ID < 50400 or $this->newline !== "\n";
+        return $this->special = (PHP_VERSION_ID < 50400 or $this->newline !== "\n");
     }
 
     /**
      * Check whether temp should be used when writting Csv
      *
-     * @param  string  $delimiter
-     * @param  string  $enclosure
      * @return boolean
      */
-    public function isSpecial($delimiter, $enclosure)
+    public function isSpecial()
     {
         static $special = false;
 
@@ -74,7 +72,7 @@ class CsvFileObject extends SplFileObject
             $special = true;
         }
 
-        return $this->special or strlen($delimiter) > 1 or strlen($enclosure) > 1;
+        return $this->special;
     }
 
     /**
@@ -89,7 +87,7 @@ class CsvFileObject extends SplFileObject
     {
         $this->defaultCsvControl($delimiter, $enclosure);
 
-        if ($this->isSpecial($delimiter, $enclosure)) {
+        if ($this->isSpecial()) {
             $line = $this->getTempLine($fields, $delimiter, $enclosure);
 
             // fputcsv() hardcodes "\n" as a new line character
