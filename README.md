@@ -1,6 +1,7 @@
 # Indigo CSV
 
 [![Build Status](https://travis-ci.org/indigophp/csv.png?branch=develop)](https://travis-ci.org/indigophp/csv)
+[![Code Coverage](https://scrutinizer-ci.com/g/indigophp/csv/badges/coverage.png?s=28a0aa532eb1db42c03a6b8a22fadac166580645)](https://scrutinizer-ci.com/g/indigophp/csv/)
 [![Latest Stable Version](https://poser.pugx.org/indigophp/csv/v/stable.png)](https://packagist.org/packages/indigophp/csv)
 [![Total Downloads](https://poser.pugx.org/indigophp/csv/downloads.png)](https://packagist.org/packages/indigophp/csv)
 [![Scrutinizer Quality Score](https://scrutinizer-ci.com/g/indigophp/csv/badges/quality-score.png?s=4fe872e620a5b912c68fc481f342795568695e9d)](https://scrutinizer-ci.com/g/indigophp/csv/)
