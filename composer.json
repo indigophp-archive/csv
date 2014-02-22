@@ -1,0 +1,22 @@
+{
+    "name": "indigophp/csv",
+    "description": "Simple CSV file reading-writting",
+    "license": "MIT",
+    "keywords": ["csv"],
+    "homepage": "https://indigophp.com",
+    "authors": [
+        {
+            "name": "Márk Sági-Kazár",
+            "email": "mark.sagikazar@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.2",
+        "symfony/options-resolver": "v2.4.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "Indigo\\Csv\\": ["src/", "tests/"]
+        }
+    }
+}
