@@ -42,8 +42,8 @@ class CsvFileObject extends SplFileObject
     /**
      * Check whether temp should be used when writting Csv
      *
-     * @param  string $delimiter
-     * @param  string $enclosure
+     * @param  string  $delimiter
+     * @param  string  $enclosure
      * @return boolean
      */
     public function isSpecial($delimiter, $enclosure)
@@ -60,9 +60,9 @@ class CsvFileObject extends SplFileObject
     /**
      * Writes the fields array to the file as a CSV line.
      *
-     * @param  array   $fields
-     * @param  string  $delimiter
-     * @param  string  $enclosure
+     * @param  array         $fields
+     * @param  string        $delimiter
+     * @param  string        $enclosure
      * @return integer|false
      */
     public function fputcsv($fields, $delimiter = null, $enclosure = null)

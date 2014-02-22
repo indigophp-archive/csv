@@ -14,9 +14,6 @@ namespace Indigo\Csv;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 use Symfony\Component\OptionsResolver\Options;
-use InvalidArgumentException;
-use UnexpectedValueException;
-use BadMethodCallException;
 
 /**
  * Csv class
